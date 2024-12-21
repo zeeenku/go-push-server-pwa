@@ -148,17 +148,11 @@ func sendScheduledNotifications() {
 }
 
 func sendNotification(sub webpush.Subscription, message string) error {
-	// Create the VAPID options
-	vapid := webpush.VAPID{
-		Subject:    os.Getenv("NOTIFICATION_SUBJECT"), // Email or URL of your service
-		PrivateKey: vapidPrivateKey,
-		PublicKey:  vapidPublicKey,
-	}
-
-	// Send notification
 	resp, err := webpush.SendNotification([]byte(message), &sub, &webpush.Options{
-		VAPID: vapid,
-		TTL:   30, // Time to live for the notification
+		Subscriber:      os.Getenv("NOTIFICATION_SUBJECT"),
+		VAPIDPrivateKey: vapidPrivateKey,
+		//VAPIDPublicKey:  vapidPublicKey,
+		TTL: 30,
 	})
 	if err != nil {
 		return err
