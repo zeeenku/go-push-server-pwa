@@ -1,29 +1,36 @@
 #!/bin/bash
 
-# Load environment variables from .env file (with handling for spaces and special characters)
-if [ -f "$PROJECT_DIR/.env" ]; then
-  export $(grep -v '^#' $PROJECT_DIR/.env | xargs -d '\n')
+# Step 1: Load environment variables from .env file
+if [ -f ".env" ]; then
+  export $(cat .env | xargs)
 else
   echo ".env file not found!"
   exit 1
 fi
 
-# Step 1: Pull latest changes from the repository
-echo "Pulling latest changes from Git..."
-cd $PROJECT_DIR
-git pull
+# Step 2: Verify that PROJECT_DIR is set
+if [ -z "$PROJECT_DIR" ]; then
+  echo "PROJECT_DIR is not set in the .env file!"
+  exit 1
+fi
 
-# Step 2: Install dependencies (if needed)
-# For Go, you might want to download new dependencies
-# go get -u ./...
+# Step 3: Navigate to the project directory
+cd "$PROJECT_DIR" || exit
 
-# Step 3: Build the Go app (if using a compiled binary)
+# Step 4: Install the Go modules required for the project
+echo "Installing Go modules..."
+go mod tidy
+go mod download
+
+# Step 5: Build the Go project
 echo "Building the Go project..."
 go build -o push-server main.go
 
-# Step 4: Create or update the systemd service file
+# Step 6: Create or update the systemd service file
 echo "Creating systemd service file..."
-cat > $SERVICE_FILE <<EOF
+SERVICE_FILE="/etc/systemd/system/push-server.service"
+
+cat > "$SERVICE_FILE" <<EOF
 [Unit]
 Description=Push Notification Server
 After=network.target
@@ -41,16 +48,16 @@ RestartSec=10s
 WantedBy=multi-user.target
 EOF
 
-# Step 5: Reload systemd to apply the new service file
+# Step 7: Reload systemd to apply the new service file
 echo "Reloading systemd to apply new service..."
 sudo systemctl daemon-reload
 
-# Step 6: Enable and start the service
+# Step 8: Enable and start the push-server service
 echo "Enabling and starting the push-server service..."
 sudo systemctl enable push-server.service
 sudo systemctl start push-server.service
 
-# Step 7: Restart nginx (optional)
+# Step 9: Restart nginx (optional)
 echo "Restarting nginx service..."
 sudo systemctl restart nginx
 
