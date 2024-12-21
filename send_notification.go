@@ -20,12 +20,14 @@ func main() {
 	vapidPublicKey := os.Getenv("VAPID_PUBLIC_KEY")
 	vapidPrivateKey := os.Getenv("VAPID_PRIVATE_KEY")
 
+	// Open the database connection
 	db, err := sql.Open("sqlite3", "./subscribers.db")
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
 	defer db.Close()
 
+	// Query to get the subscriptions
 	rows, err := db.Query("SELECT endpoint, p256dh, auth FROM subscriptions")
 	if err != nil {
 		log.Fatal("Failed to fetch subscriptions:", err)
@@ -34,6 +36,7 @@ func main() {
 
 	message := os.Getenv("CUSTOM_MESSAGE") // Load message from environment
 
+	// Loop through the subscriptions and send notifications
 	for rows.Next() {
 		var endpoint, p256dh, auth string
 		err := rows.Scan(&endpoint, &p256dh, &auth)
@@ -42,6 +45,7 @@ func main() {
 			continue
 		}
 
+		// Create subscription object
 		sub := webpush.Subscription{
 			Endpoint: endpoint,
 			Keys: webpush.Keys{
@@ -50,17 +54,25 @@ func main() {
 			},
 		}
 
+		// Create VAPID struct with your public/private keys and subject
+		vapid := webpush.VAPID{
+			Subject:    os.Getenv("NOTIFICATION_SUBJECT"),
+			PrivateKey: vapidPrivateKey,
+			PublicKey:  vapidPublicKey,
+		}
+
+		// Send the notification
 		resp, err := webpush.SendNotification([]byte(message), &sub, &webpush.Options{
-			Subscriber:      os.Getenv("NOTIFICATION_SUBJECT"),
-			VAPIDPrivateKey: vapidPrivateKey,
-			VAPIDPublicKey:  vapidPublicKey,
-			TTL:             30,
+			VAPID: vapid, // Use VAPID struct
+			TTL:   30,    // Time-to-live for the notification
 		})
+
 		if err != nil {
 			log.Println("Failed to send notification to a subscriber:", err)
 			continue
 		}
-		resp.Body.Close()
+		defer resp.Body.Close()
+
 		log.Println("Notification sent successfully to:", endpoint)
 	}
 }
