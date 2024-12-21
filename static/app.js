@@ -1,14 +1,19 @@
 // Check if the browser supports notifications
 if ('Notification' in window) {
     // Request permission to show notifications
+    document.addEventListener('click', function() {
+
     Notification.requestPermission().then(function(permission) {
         if (permission === "granted") {
             console.log("Notification permission granted.");
+            alert("Notification permission granted.");
             subscribeUserToPushNotifications();  // Proceed with subscription
         } else {
             console.log("Notification permission denied.");
+            alert("Notification permission denied.");
         }
     });
+});
 } else {
     console.log("Notifications are not supported by this browser.");
 }
