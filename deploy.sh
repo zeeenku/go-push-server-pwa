@@ -22,40 +22,9 @@ echo "Installing Go modules..."
 go mod tidy
 go mod download
 
-# Step 5: Build the Go project
+# Step 5: Build the Go project (including main.go and any other Go files like send_notification.go)
 echo "Building the Go project..."
-go build -o push-server main.go
-
-# Step 6: Create or update the systemd service file
-echo "Creating systemd service file..."
-SERVICE_FILE="/etc/systemd/system/push-server.service"
-
-cat > "$SERVICE_FILE" <<EOF
-[Unit]
-Description=Push Notification Server
-After=network.target
-
-[Service]
-User=your-username
-Group=your-username
-WorkingDirectory=$PROJECT_DIR
-ExecStart=$PROJECT_DIR/push-server
-Restart=always
-EnvironmentFile=$PROJECT_DIR/.env
-RestartSec=10s
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# Step 7: Reload systemd to apply the new service file
-echo "Reloading systemd to apply new service..."
-sudo systemctl daemon-reload
-
-# Step 8: Enable and start the push-server service
-echo "Enabling and starting the push-server service..."
-sudo systemctl enable push-server.service
-sudo systemctl start push-server.service
+go build -o push-server main.go send_notification.go
 
 # Step 9: Restart nginx (optional)
 echo "Restarting nginx service..."
