@@ -17,7 +17,7 @@ function subscribeUserToPushNotifications() {
         navigator.serviceWorker.ready.then(function(registration) {
             registration.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: 'YOUR_VAPID_PUBLIC_KEY'  // Replace with your actual VAPID public key
+                applicationServerKey: 'BDwYEyB3V2_NMzEgcGascHE3PUSQVPob7mnKyA5Qf8gzUqBWKDqlJQ_LujMSPbuYoWHH64pGKSnNJFtCANbTETM'  // Replace with your actual VAPID public key
             }).then(function(subscription) {
                 console.log('User is subscribed:', subscription);
 
