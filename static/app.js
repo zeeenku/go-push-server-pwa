@@ -10,14 +10,15 @@ if ('Notification' in window) {
         }
     });
 }
-
 function subscribeUserToPushNotifications() {
     // Check if service worker and PushManager are available
     if ('serviceWorker' in navigator && 'PushManager' in window) {
         navigator.serviceWorker.ready.then(function(registration) {
+            const base64urlVapidPublicKey = 'BDwYEyB3V2_NMzEgcGascHE3PUSQVPob7mnKyA5Qf8gzUqBWKDqlJQ_LujMSPbuYoWHH64pGKSnNJFtCANbTETM'; // Your base64url VAPID key
+            
             registration.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: 'BDwYEyB3V2_NMzEgcGascHE3PUSQVPob7mnKyA5Qf8gzUqBWKDqlJQ_LujMSPbuYoWHH64pGKSnNJFtCANbTETM'  // Replace with your actual VAPID public key
+                applicationServerKey: base64urlVapidPublicKey
             }).then(function(subscription) {
                 console.log('User is subscribed:', subscription);
 
@@ -35,6 +36,7 @@ function subscribeUserToPushNotifications() {
         });
     }
 }
+
 
 // Register the service worker
 if ('serviceWorker' in navigator) {
