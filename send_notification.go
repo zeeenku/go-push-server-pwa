@@ -17,7 +17,6 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	vapidPublicKey := os.Getenv("VAPID_PUBLIC_KEY")
 	vapidPrivateKey := os.Getenv("VAPID_PRIVATE_KEY")
 
 	db, err := sql.Open("sqlite3", "./subscribers.db")
