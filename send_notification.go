@@ -49,17 +49,25 @@ func main() {
 			},
 		}
 
-		resp, err := webpush.SendNotification([]byte(message), &sub, &webpush.Options{
-			Subscriber:      os.Getenv("NOTIFICATION_SUBJECT"),
-			VAPIDPrivateKey: vapidPrivateKey,
-			//VAPIDPublicKey:  vapidPublicKey,
-			TTL: 30,
-		})
+		err = sendNotification(sub, message)
 		if err != nil {
 			log.Println("Failed to send notification to a subscriber:", err)
-			continue
 		}
-		resp.Body.Close()
-		log.Println("Notification sent successfully to:", endpoint)
 	}
+}
+
+func sendNotification(sub webpush.Subscription, message string) error {
+	resp, err := webpush.SendNotification([]byte(message), &sub, &webpush.Options{
+		Subscriber:      os.Getenv("NOTIFICATION_SUBJECT"),
+		VAPIDPrivateKey: os.Getenv("VAPID_PRIVATE_KEY"),
+		//VAPIDPublicKey:  os.Getenv("VAPID_PUBLIC_KEY"),
+		TTL: 30,
+	})
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	log.Println("Notification sent to:", sub.Endpoint)
+	return nil
 }
