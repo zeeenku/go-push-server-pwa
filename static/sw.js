@@ -10,6 +10,8 @@ self.addEventListener('install', (event) => {
             ]);
         })
     );
+    console.log('Service Worker installing...');
+
 });
 
 self.addEventListener('push', (event) => {
@@ -30,3 +32,5 @@ self.addEventListener('notificationclick', (event) => {
         clients.openWindow('/')
     );
 });
+
+
