@@ -15,16 +15,20 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('push', (event) => {
     console.log('Push notification received:', event);
+
+    const notif = event.data ? event.data.text() : 'Here is a notification!';
     const options = {
-        body: event.data ? event.data.text() : 'Here is a notification!',
-        icon: '/icons/icon-192x192.png',
-        badge: '/icons/icon-192x192.png',
+        body: notif,
+        icon: '/icons/icon-192x192.png', // Ensure this path points to a valid icon file
+        badge: '/icons/icon-192x192.png', // Badge is also important for iOS
     };
 
+    // Ensure the notification is shown even if no body data exists
     event.waitUntil(
-        self.registration.showNotification('Push Notification', options)
+        self.registration.showNotification("You might need this quote", options)
     );
 });
+
 
 self.addEventListener('notificationclick', (event) => {
     console.log('Notification clicked:', event);

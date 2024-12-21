@@ -3,12 +3,37 @@ package main
 import (
 	"database/sql"
 	"log"
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/SherClockHolmes/webpush-go"
 	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
 )
+
+type Quote struct {
+	Quote  string `json:"quote"`
+	Author string `json:"author"`
+}
+
+var quotes = []Quote{
+	{"Life isn’t about getting and having, it’s about giving and being.", "Kevin Kruse"},
+	{"Whatever the mind of man can conceive and believe, it can achieve.", "Napoleon Hill"},
+	{"Strive not to be a success, but rather to be of value.", "Albert Einstein"},
+	{"Two roads diverged in a wood, and I—I took the one less traveled by, And that has made all the difference.", "Robert Frost"},
+	{"I attribute my success to this: I never gave or took any excuse.", "Florence Nightingale"},
+	{"You miss 100% of the shots you don’t take.", "Wayne Gretzky"},
+	{"I’ve missed more than 9000 shots in my career. I’ve lost almost 300 games. 26 times I’ve been trusted to take the game winning shot and missed. I’ve failed over and over and over again in my life. And that is why I succeed.", "Michael Jordan"},
+	// Add more quotes here
+}
+
+func getRandomQuote() string {
+	rand.Seed(time.Now().UnixNano())
+	randomIndex := rand.Intn(len(quotes))
+	selectedQuote := quotes[randomIndex]
+	return "\"" + selectedQuote.Quote + "\" - " + selectedQuote.Author
+}
 
 func main() {
 	// Load environment variables
@@ -29,7 +54,7 @@ func main() {
 	}
 	defer rows.Close()
 
-	message := os.Getenv("CUSTOM_MESSAGE") // Load message from environment
+	message := getRandomQuote() // Get a random quote as the message
 
 	for rows.Next() {
 		var endpoint, p256dh, auth string
