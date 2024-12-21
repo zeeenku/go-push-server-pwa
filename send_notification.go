@@ -1,56 +1,66 @@
 package main
 
 import (
-	"encoding/json"
+	"database/sql"
 	"log"
 	"os"
 
 	"github.com/SherClockHolmes/webpush-go"
+	"github.com/joho/godotenv"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		log.Fatal("Usage: go run send_notification.go \"Your message here\"")
-	}
-
-	message := os.Args[1]
-
-	// Load subscribers from a file or database
-	var subscribers []webpush.Subscription
-	file, err := os.Open("subscribers.json")
+	// Load environment variables
+	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("Failed to open subscribers file:", err)
+		log.Fatal("Error loading .env file")
 	}
-	defer file.Close()
 
-	err = json.NewDecoder(file).Decode(&subscribers)
+	vapidPublicKey := os.Getenv("VAPID_PUBLIC_KEY")
+	vapidPrivateKey := os.Getenv("VAPID_PRIVATE_KEY")
+
+	db, err := sql.Open("sqlite3", "./subscribers.db")
 	if err != nil {
-		log.Fatal("Failed to decode subscribers:", err)
+		log.Fatal("Failed to connect to database:", err)
 	}
+	defer db.Close()
 
-	// Send notification to all subscribers
-	for _, sub := range subscribers {
-		err := sendNotification(sub, message)
+	rows, err := db.Query("SELECT endpoint, p256dh, auth FROM subscriptions")
+	if err != nil {
+		log.Fatal("Failed to fetch subscriptions:", err)
+	}
+	defer rows.Close()
+
+	message := os.Getenv("CUSTOM_MESSAGE") // Load message from environment
+
+	for rows.Next() {
+		var endpoint, p256dh, auth string
+		err := rows.Scan(&endpoint, &p256dh, &auth)
+		if err != nil {
+			log.Println("Failed to scan subscription:", err)
+			continue
+		}
+
+		sub := webpush.Subscription{
+			Endpoint: endpoint,
+			Keys: webpush.Keys{
+				P256dh: p256dh,
+				Auth:   auth,
+			},
+		}
+
+		resp, err := webpush.SendNotification([]byte(message), &sub, &webpush.Options{
+			Subscriber:      os.Getenv("NOTIFICATION_SUBJECT"),
+			VAPIDPrivateKey: vapidPrivateKey,
+			VAPIDPublicKey:  vapidPublicKey,
+			TTL:             30,
+		})
 		if err != nil {
 			log.Println("Failed to send notification to a subscriber:", err)
+			continue
 		}
+		resp.Body.Close()
+		log.Println("Notification sent successfully to:", endpoint)
 	}
-}
-
-func sendNotification(sub webpush.Subscription, message string) error {
-	vapidPrivateKey := "YOUR_PRIVATE_KEY"
-	vapidPublicKey := "YOUR_PUBLIC_KEY"
-
-	resp, err := webpush.SendNotification([]byte(message), &sub, &webpush.Options{
-		Subscriber:      "mailto:example@example.com",
-		VAPIDPrivateKey: vapidPrivateKey,
-		VAPIDPublicKey:  vapidPublicKey,
-		TTL:             30,
-	})
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	return nil
 }
