@@ -96,6 +96,9 @@ func saveSubscription(sub webpush.Subscription) error {
         ON CONFLICT(endpoint) DO NOTHING
     `, sub.Endpoint, sub.Keys.P256dh, sub.Keys.Auth)
 
+	if err != nil {
+		log.Printf("Error saving subscription: %v", err)
+	}
 	return err
 }
 
@@ -159,5 +162,6 @@ func sendNotification(sub webpush.Subscription, message string) error {
 	}
 	defer resp.Body.Close()
 
+	log.Println("Notification sent to:", sub.Endpoint)
 	return nil
 }
