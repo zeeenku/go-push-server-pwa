@@ -1,47 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PWA Push Notifications</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your PWA App</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Favicon and Icons -->
+    <link rel="icon" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+
+    <!-- Add to home screen -->
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Your Progressive Web App Description">
 </head>
 <body>
-  <h1>Push Notifications PWA</h1>
-  <button id="enable-notifications">Enable Notifications</button>
+    <h1>Welcome to Your PWA</h1>
 
-  <script>
-    document.getElementById('enable-notifications').addEventListener('click', async () => {
-      if (!('serviceWorker' in navigator)) {
-        alert('Service workers are not supported in this browser.');
-        return;
-      }
-
-      // Register the service worker
-      const registration = await navigator.serviceWorker.register('/sw.js');
-      console.log('Service Worker registered:', registration);
-
-      // Request permission for notifications
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        alert('Permission not granted for notifications.');
-        return;
-      }
-
-      // Subscribe to push notifications
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: 'YOUR_PUBLIC_KEY'
-      });
-
-      // Send subscription to the server
-      await fetch('/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(subscription)
-      });
-
-      alert('Notifications enabled!');
-    });
-  </script>
+    <script src="/app.js"></script> <!-- Include the JavaScript file -->
 </body>
 </html>
