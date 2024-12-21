@@ -12,7 +12,7 @@ if ('Notification' in window) {
 }
 function subscribeUserToPushNotifications() {
     // Check if service worker and PushManager are available
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
+    // if ('serviceWorker' in navigator && 'PushManager' in window) {
         navigator.serviceWorker.ready.then(function(registration) {
             const base64urlVapidPublicKey = 'BDwYEyB3V2_NMzEgcGascHE3PUSQVPob7mnKyA5Qf8gzUqBWKDqlJQ_LujMSPbuYoWHH64pGKSnNJFtCANbTETM'; // Your base64url VAPID key
             
@@ -34,7 +34,7 @@ function subscribeUserToPushNotifications() {
                 console.error('Error subscribing to push notifications:', error);
             });
         });
-    }
+    // }
 }
 
 
