@@ -34,6 +34,14 @@ function subscribeUserToPushNotifications() {
                     headers: {
                         'Content-Type': 'application/json'
                     }
+                }).then(response => {
+                    if (response.ok) {
+                        console.log("Subscription sent to server.");
+                    } else {
+                        console.error("Failed to send subscription to server.");
+                    }
+                }).catch(error => {
+                    console.error("Error sending subscription to server:", error);
                 });
             })
             .catch(function(error) {
@@ -59,4 +67,3 @@ function urlBase64ToUint8Array(base64String) {
 
     return outputArray;  // Return the binary data
 }
-
